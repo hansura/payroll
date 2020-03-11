@@ -2,6 +2,7 @@ package payroll.payrollservice.Model;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -23,6 +24,7 @@ public   class TaxRate  {
     private Double fromSalary;
 
     private Double uptoSalary;
+
 
     private String taxRatePercent;
 

@@ -11,11 +11,7 @@ import payroll.payrollservice.Model.*;
 import payroll.payrollservice.Repository.*;
 
 import javax.transaction.Transactional;
-import java.nio.DoubleBuffer;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @RequestMapping( value = "api/payroll/")
@@ -27,17 +23,16 @@ public class PayrollController {
     Double allowanceNonTaxable = 0.0;
     Double allowanceAddedToNetSalary = 0.0;
     Double allowanceTaxPercent = 0.0;
-    Double totalAmount = 0.0;
+    Double totalSalary = 0.0;
     Double taxRatePercent = 0.0;
     Double incomeTax = 0.0;
     Double grossSalary = 0.0;
     TaxRate taxRate = null;
-    Double pensionPercent = 0.0;
-    Double employeePension = 0.0;
+    Double taxableAllowance = 0.0;
     Double netIncome = 0.0;
 
     @Autowired
-    PensionRepository pensionRepository;
+    DeductionRepository deductionRepository;
 
     @Autowired
     TaxRateRepository taxRateRepository;
@@ -77,9 +72,9 @@ public class PayrollController {
 
         List<TaxRate> taxRates = taxRateRepository.findAll();
 
-        Pension pension = pensionRepository.findById(payrollDAO.getPensionId()).orElseThrow(
-                () -> new CustomNotFoundException("Pension Not Found")
-        );
+//        Deduction deduction = deductionRepository.findById(payrollDAO.getPensionId()).orElseThrow(
+//                () -> new CustomNotFoundException("Pension Not Found")
+//        );
 
         List<Long>  allowanceIds = payrollDAO.getAllowanceIds();
         List<Allowance> allowances = new ArrayList<>();
@@ -87,34 +82,38 @@ public class PayrollController {
 
           calculateAllowance(allowances);
 
-           taxRate = new TaxRate();
-           taxRate = getTaxRateDetail(grossSalary , taxRates);
 
-            taxRatePercent =  converPercentToNumber(taxRate.getTaxRatePercent());
-               System.out.println("taxrate percent \t" + taxRatePercent);
 
-         incomeTax = calcuateIncomeTax( grossSalary , taxRatePercent , taxRate.getDeduction());
+        taxRate = new TaxRate();
 
-         System.out.println("income tax \t" + incomeTax);
+        taxRate = getTaxRateDetail(grossSalary , taxRates);
 
-         pensionPercent = converPercentToNumber(pension.getByEmployee()) ;
-         System.out.println("Pension Percent \t" + pensionPercent);
+        taxRatePercent =  convertPercentToNumber(taxRate.getTaxRatePercent());
+        System.out.println("taxrate percent  \t" + taxRatePercent);
 
-        employeePension = calculatePension(grossSalary , pensionPercent);
+        incomeTax = calculateIncomeTax( grossSalary , taxRatePercent , taxRate.getDeduction());
+        System.out.println("income tax \t" + incomeTax);
 
-        System.out.println("by employee \t" + employeePension);
+        List<Double> deductedAmounts =  calculateDeduction(payrollDAO.getDeductionIds() , grossSalary );
 
-        netIncome =   calculateNetIncome( grossSalary , incomeTax ,employeePension ) ;
+        List<Deduction> deductions = getDeduction(payrollDAO.getDeductionIds());
+
+
+
+
+
+        netIncome =   calculateNetIncome( grossSalary , incomeTax , deductedAmounts ) ;
+
         System.out.println("allowance non taxable \t" + allowanceNonTaxable);
         System.out.println("allowance taxable \t" + allowanceAddedToNetSalary);
-
+        System.out.println("taxable allowance that added to gross \t" + taxableAllowance);
         totalAllowance = allowanceAddedToNetSalary + allowanceNonTaxable;
 
-        totalAmount = (netIncome + totalAllowance);
+        totalSalary = (netIncome + totalAllowance);
+
         System.out.println("net salary \t" + netIncome);
-        System.out.println("net Salary + Partial allowance + non taxable allowance\t" + totalAmount);
-        System.out.println("total net salary \t" + netIncome);
-        System.out.println("total amount \t" + totalAmount );
+        System.out.println("net Salary + Partial allowance + non taxable allowance\t" + totalSalary);
+        System.out.println("total amount \t" + totalSalary );
 
 
         Payroll payroll = payrollDAO.getPayroll();
@@ -122,11 +121,11 @@ public class PayrollController {
         payroll.setTaxRate(taxRate);
         payroll.setEmployee(employee);
         payroll.setIncomeTax(incomeTax);
-        payroll.setPension(pension);
+        payroll.setDeduction(deductions);
         payroll.setNetSalary(netIncome);
         payroll.setAllowance(allowances);
         payroll.setTotalAllowance(totalAllowance);
-        payroll.setTotalAmount(totalAmount);
+        payroll.setTotalAmount(totalSalary);
 
         payrollRepository.save(payroll);
 
@@ -145,7 +144,6 @@ public class PayrollController {
                 () -> new CustomNotFoundException("Payroll Not Found ")
         );
 
-
          grossSalary = payrollDAO.getPayroll().getGrossSalary();
 
         System.out.println("grosssalary \t" + grossSalary);
@@ -155,54 +153,55 @@ public class PayrollController {
         );
 
         List<TaxRate> taxRates = taxRateRepository.findAll();
-        Pension pension = pensionRepository.findById(payrollDAO.getPensionId()).orElseThrow(
-                () -> new CustomNotFoundException("Pension Not Found")
-        );
+
 
         List<Long>  allowanceIds = payrollDAO.getAllowanceIds();
         List<Allowance> allowances = new ArrayList<>();
+
         allowanceIds.forEach( (id) -> allowances.add(allowanceRepository.findById(id).get()));
 
-          calculateAllowance(allowances);
+        calculateAllowance(allowances);
 
          taxRate = new TaxRate();
          taxRate = getTaxRateDetail(grossSalary , taxRates);
 
-        taxRatePercent =  converPercentToNumber(taxRate.getTaxRatePercent());
+        taxRatePercent =  convertPercentToNumber(taxRate.getTaxRatePercent());
         System.out.println("taxrate percent \t" + taxRatePercent);
 
-         incomeTax =  calcuateIncomeTax(grossSalary , taxRatePercent ,taxRate.getDeduction() );
+        incomeTax =  calculateIncomeTax(grossSalary , taxRatePercent ,taxRate.getDeduction() );
+
         System.out.println("income tax \t" + incomeTax);
 
-         pensionPercent = converPercentToNumber(pension.getByEmployee());
-        System.out.println("Pension Percent \t" + pensionPercent);
+        List<Double> deductedAmounts =  calculateDeduction(payrollDAO.getDeductionIds() , grossSalary );
 
-         employeePension =  calculatePension(grossSalary , pensionPercent) ;
-        System.out.println("by employee \t" + employeePension);
+        List<Deduction> deductions = getDeduction(payrollDAO.getDeductionIds());
 
-         netIncome = calculateNetIncome ( grossSalary , incomeTax , employeePension ) ;
+
+
+         netIncome = calculateNetIncome ( grossSalary , incomeTax , deductedAmounts ) ;
+
         System.out.println("allowance non taxable \t" + allowanceNonTaxable);
         System.out.println("allowance taxable \t" + allowanceAddedToNetSalary);
+        System.out.println("taxable allowance  that added to gross\t" + taxableAllowance );
 
         totalAllowance = allowanceAddedToNetSalary + allowanceNonTaxable;
 
-        totalAmount = (netIncome + totalAllowance);
+        totalSalary = (netIncome + totalAllowance);
 
         System.out.println("net salary \t" + netIncome);
-        System.out.println("net Salary + Partial allowance + non taxable allowance\t" + totalAmount);
-        System.out.println("total net salary \t" + netIncome);
-        System.out.println("total amount \t" + totalAmount );
+        System.out.println("net Salary + Partial allowance + non taxable allowance = net salar \t" + totalSalary);
+        System.out.println("total salary \t" + totalSalary );
 
         Payroll newPayroll = payrollDAO.getPayroll();
         oldPayroll.setGrossSalary(newPayroll.getGrossSalary());
         oldPayroll.setEmployee(employee);
         oldPayroll.setIncomeTax(incomeTax);
         oldPayroll.setTaxRate(taxRate);
-        oldPayroll.setPension(pension);
+        oldPayroll.setDeduction(deductions);
         oldPayroll.setNetSalary(netIncome);
         oldPayroll.setAllowance(allowances);
         oldPayroll.setTotalAllowance(totalAllowance);
-        oldPayroll.setTotalAmount(totalAmount);
+        oldPayroll.setTotalAmount(totalSalary);
 
 
         payrollRepository.save(oldPayroll);
@@ -237,26 +236,55 @@ public class PayrollController {
 
 
 
-    public  Double calcuateIncomeTax(Double grossSalary , Double taxRatePercent , Double deduction){
+    public  Double calculateIncomeTax(Double grossSalary , Double taxRatePercent , Double deduction){
 
         return ((grossSalary * taxRatePercent) - deduction);
     }
 
-    public  Double converPercentToNumber( String percent){
+    public  Double convertPercentToNumber( String percent){
         allowanceTaxPercent =(Double.parseDouble(
                percent.substring(0, percent.length() -1))/100);
 
         return allowanceTaxPercent;
     }
 
-    public  Double calculatePension(Double grossSalary , Double pensionPercent ){
+    public  List<Double> calculateDeduction(List<Long> deductionIds , Double grossSalary ){
 
-        return (grossSalary * pensionPercent);
+        List<Deduction>  deductions =  getDeduction(deductionIds);
+
+        List<Double> deductAmounts = new ArrayList<>();
+
+
+        for( Deduction deduct : deductions){
+
+             deductAmounts.add(grossSalary * convertPercentToNumber(deduct.getDeductionPercent()));
+             System.out.println("deduct percents \t" +  convertPercentToNumber(deduct.getDeductionPercent()));
+             System.out.println("deduct amounts \t" + (grossSalary * convertPercentToNumber(deduct.getDeductionPercent()) ));
+        }
+
+        return deductAmounts;
     }
 
-    public  Double calculateNetIncome(Double grossSalary , Double incomeTax , Double pension){
 
-        return  (grossSalary - incomeTax - pension);
+    public List<Deduction> getDeduction( List<Long> deductionIds){
+
+        List<Deduction>  deductions = new ArrayList<>();
+        deductionIds.forEach(
+                (id) -> deductions.add(deductionRepository.findById(id).get())
+        );
+
+        return deductions;
+    }
+
+    public  Double calculateNetIncome(Double grossSalary , Double incomeTax , List<Double> deductAmounts){
+
+          for  ( Double deduction :  deductAmounts){
+
+              grossSalary = grossSalary - deduction;
+              System.out.println("Dedction \t "+ deduction + "\t gross salary become \t" + grossSalary);
+          }
+
+        return  (grossSalary - incomeTax);
     }
 
 
@@ -267,7 +295,7 @@ public class PayrollController {
             //for partial taxable
             if( allowances.get(i).isPartialTaxable() == true)
             {
-                allowanceTaxPercent =  converPercentToNumber(allowances.get(i).getPercent());
+                allowanceTaxPercent =  convertPercentToNumber(allowances.get(i).getPercent());
                 allowanceIncludeInGrossSalary = (allowances.get(i).getAmount() * allowanceTaxPercent );
                 grossSalary = grossSalary + allowanceIncludeInGrossSalary;
                 allowanceAddedToNetSalary = allowances.get(i).getAmount() - allowanceIncludeInGrossSalary;
@@ -284,6 +312,7 @@ public class PayrollController {
             }
             if(allowances.get(i).isTaxable() == true )
             {
+                taxableAllowance = allowances.get(i).getAmount();
                 grossSalary = grossSalary + allowances.get(i).getAmount();
                 System.out.println("taxable allowance => gross salary + allwoance \t" + grossSalary);
             }
@@ -296,11 +325,18 @@ public class PayrollController {
 
 
     public TaxRate getTaxRateDetail(Double grossSalary , List<TaxRate> taxRates) {
-        for (TaxRate taxRate1 : taxRates)
-            if (grossSalary >= taxRate1.getFromSalary() && grossSalary <= taxRate1.getUptoSalary())
-                return taxRate1;
+             taxRates.sort( (a, b) -> a.getFromSalary().compareTo(b.getFromSalary()));
 
-            return  null;
+        for (TaxRate taxRate1 : taxRates)
+            if (grossSalary >= taxRate1.getFromSalary() && grossSalary <= taxRate1.getUptoSalary()) {
+
+                System.out.println("gross salary \t" + grossSalary + "\t fall in to \t" + taxRate1.getTaxRatePercent());
+                return taxRate1;
+            }
+
+        System.out.println("the last tax rate is \t" + taxRates.get(taxRates.size() -1).getTaxRatePercent());
+
+            return  taxRates.get(taxRates.size() -1);
     }
 
     public  void setClassVariableToDefault(){
@@ -309,7 +345,7 @@ public class PayrollController {
         allowanceNonTaxable = 0.0;
         allowanceAddedToNetSalary = 0.0;
         allowanceTaxPercent = 0.0;
-        totalAmount = 0.0;
+        totalSalary = 0.0;
         taxRatePercent = 0.0;
     }
 

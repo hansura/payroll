@@ -9,7 +9,7 @@ public class PayrollDAO {
 
     private Payroll payroll ;
 
-    private Long pensionId;
+    private  List<Long> deductionIds;
 
     private List<Long> allowanceIds ;
 
@@ -23,14 +23,12 @@ public class PayrollDAO {
         this.payroll = payroll;
     }
 
-
-
-    public Long getPensionId() {
-        return pensionId;
+    public List<Long> getDeductionIds() {
+        return deductionIds;
     }
 
-    public void setPensionId(Long pensionId) {
-        this.pensionId = pensionId;
+    public void setDeductionIds(List<Long> deductionIds) {
+        this.deductionIds = deductionIds;
     }
 
     public List<Long> getAllowanceIds() {

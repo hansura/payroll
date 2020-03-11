@@ -1,11 +1,6 @@
 package payroll.payrollservice.Model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-
 import javax.persistence.*;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,8 +35,11 @@ public   class Payroll   {
         @ManyToOne( fetch = FetchType.LAZY , cascade = CascadeType.ALL)
         private  TaxRate taxRate;
 
-        @ManyToOne(fetch = FetchType.LAZY)
-        private  Pension pension;
+        @ManyToMany
+        @JoinTable( name = "payroll_deduction" ,
+                joinColumns =  { @JoinColumn ( name ="payroll_id") } ,
+                inverseJoinColumns = { @JoinColumn ( name = "deduction_id")})
+        private List<Deduction> deduction = new ArrayList<>();
 
         @ManyToOne( fetch = FetchType.LAZY)
         private  Employee employee ;
@@ -49,7 +47,6 @@ public   class Payroll   {
 
         public Payroll() {
         }
-
 
     public Long getId() {
         return id;
@@ -115,12 +112,12 @@ public   class Payroll   {
         this.taxRate = taxRate;
     }
 
-    public Pension getPension() {
-        return pension;
+    public List<Deduction> getDeduction() {
+        return deduction;
     }
 
-    public void setPension(Pension pension) {
-        this.pension = pension;
+    public void setDeduction(List<Deduction> deduction) {
+        this.deduction = deduction;
     }
 
     public Employee getEmployee() {
