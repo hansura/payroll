@@ -4,7 +4,12 @@ package payroll.payrollservice.Controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
+import payroll.payrollservice.CustomException.CustomBadRequestException;
+import payroll.payrollservice.CustomException.CustomInternalServerErrorException;
 import payroll.payrollservice.CustomException.CustomNotFoundException;
 import payroll.payrollservice.DataAccessObjects.PayrollDAO;
 import payroll.payrollservice.Model.*;
@@ -60,78 +65,74 @@ public class PayrollController {
 
     @Transactional
     @PostMapping( value = "addPayroll")
-    public ResponseEntity<?> addPayroll(@RequestBody   PayrollDAO payrollDAO) throws  CustomNotFoundException{
-
-                    grossSalary = payrollDAO.getPayroll().getGrossSalary();
-
-                    System.out.println("grosssalary \t" + grossSalary);
-
-             Employee employee = employeeRepository.findById(payrollDAO.getEmployeeId()).orElseThrow(
-                ()-> new CustomNotFoundException("Employee Not Found")
-              );
-
-        List<TaxRate> taxRates = taxRateRepository.findAll();
-
-//        Deduction deduction = deductionRepository.findById(payrollDAO.getPensionId()).orElseThrow(
-//                () -> new CustomNotFoundException("Pension Not Found")
-//        );
-
-        List<Long>  allowanceIds = payrollDAO.getAllowanceIds();
-        List<Allowance> allowances = new ArrayList<>();
-        allowanceIds.forEach( (id) -> allowances.add(allowanceRepository.findById(id).get()));
-
-          calculateAllowance(allowances);
+    public ResponseEntity<?> addPayroll(@RequestBody   PayrollDAO payrollDAO) throws
+            CustomNotFoundException {
 
 
+            grossSalary = payrollDAO.getPayroll().getGrossSalary();
 
-        taxRate = new TaxRate();
+            System.out.println("grosssalary \t" + grossSalary);
 
-        taxRate = getTaxRateDetail(grossSalary , taxRates);
+            Employee employee = employeeRepository.findById(payrollDAO.getEmployeeId()).orElseThrow(
+                    () -> new CustomNotFoundException("Employee Not Found")
+            );
 
-        taxRatePercent =  convertPercentToNumber(taxRate.getTaxRatePercent());
-        System.out.println("taxrate percent  \t" + taxRatePercent);
-
-        incomeTax = calculateIncomeTax( grossSalary , taxRatePercent , taxRate.getDeduction());
-        System.out.println("income tax \t" + incomeTax);
-
-        List<Double> deductedAmounts =  calculateDeduction(payrollDAO.getDeductionIds() , grossSalary );
-
-        List<Deduction> deductions = getDeduction(payrollDAO.getDeductionIds());
+            List<TaxRate> taxRates = taxRateRepository.findAll();
 
 
+            List<Long> allowanceIds = payrollDAO.getAllowanceIds();
+            List<Allowance> allowances = new ArrayList<>();
+            allowanceIds.forEach((id) -> allowances.add(allowanceRepository.findById(id).get()));
+
+            calculateAllowance(allowances);
+
+            taxRate = new TaxRate();
+
+            taxRate = getTaxRateDetail(grossSalary, taxRates);
+
+            taxRatePercent = convertPercentToNumber(taxRate.getTaxRatePercent());
+            System.out.println("taxrate percent  \t" + taxRatePercent);
+
+            incomeTax = calculateIncomeTax(grossSalary, taxRatePercent, taxRate.getDeduction());
+            System.out.println("income tax \t" + incomeTax);
+
+            List<Double> deductedAmounts = calculateDeduction(payrollDAO.getDeductionIds(), grossSalary);
+
+            List<Deduction> deductions = getDeduction(payrollDAO.getDeductionIds());
 
 
+            netIncome = calculateNetIncome(grossSalary, incomeTax, deductedAmounts);
 
-        netIncome =   calculateNetIncome( grossSalary , incomeTax , deductedAmounts ) ;
+            System.out.println("allowance non taxable \t" + allowanceNonTaxable);
+            System.out.println("allowance taxable \t" + allowanceAddedToNetSalary);
+            System.out.println("taxable allowance that added to gross \t" + taxableAllowance);
+            totalAllowance = allowanceAddedToNetSalary + allowanceNonTaxable;
 
-        System.out.println("allowance non taxable \t" + allowanceNonTaxable);
-        System.out.println("allowance taxable \t" + allowanceAddedToNetSalary);
-        System.out.println("taxable allowance that added to gross \t" + taxableAllowance);
-        totalAllowance = allowanceAddedToNetSalary + allowanceNonTaxable;
+            totalSalary = (netIncome + totalAllowance);
 
-        totalSalary = (netIncome + totalAllowance);
-
-        System.out.println("net salary \t" + netIncome);
-        System.out.println("net Salary + Partial allowance + non taxable allowance\t" + totalSalary);
-        System.out.println("total amount \t" + totalSalary );
+            System.out.println("net salary \t" + netIncome);
+            System.out.println("net Salary + Partial allowance + non taxable allowance\t" + totalSalary);
+            System.out.println("total amount \t" + totalSalary);
 
 
-        Payroll payroll = payrollDAO.getPayroll();
-        payroll.setGrossSalary(grossSalary);
-        payroll.setTaxRate(taxRate);
-        payroll.setEmployee(employee);
-        payroll.setIncomeTax(incomeTax);
-        payroll.setDeduction(deductions);
-        payroll.setNetSalary(netIncome);
-        payroll.setAllowance(allowances);
-        payroll.setTotalAllowance(totalAllowance);
-        payroll.setTotalAmount(totalSalary);
+            Payroll payroll = payrollDAO.getPayroll();
+            payroll.setGrossSalary(grossSalary);
+            payroll.setTaxRate(taxRate);
+            payroll.setEmployee(employee);
+            payroll.setIncomeTax(incomeTax);
+            payroll.setDeduction(deductions);
+            payroll.setNetSalary(netIncome);
+            payroll.setAllowance(allowances);
+            payroll.setTotalAllowance(totalAllowance);
+            payroll.setTotalAmount(totalSalary);
 
-        payrollRepository.save(payroll);
+            payrollRepository.save(payroll);
 
-        setClassVariableToDefault();
+            setClassVariableToDefault();
 
-        response.put("message" , "paryroll Successfully inserted");
+            response.put("message", "paryroll Successfully inserted");
+
+
 
       return new ResponseEntity<>(response , HttpStatus.OK);
     }

@@ -59,7 +59,7 @@ public class CustomExceptionHandler  extends Exception {
 
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
     @ExceptionHandler(CustomBadRequestException.class )
-    public ResponseEntity<CustomBadRequestException> nullException(CustomBadRequestException exception  ,WebRequest webRequest) {
+    public ResponseEntity<CustomBadRequestException> badRequestException(CustomBadRequestException exception  ,WebRequest webRequest) {
         ApplicationErrorMessage error = new ApplicationErrorMessage();
         error.setStatusCode(400);
         error.setErrorMessage(exception.getMessage());
