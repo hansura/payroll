@@ -1,7 +1,8 @@
 # payroll
 Payroll Service
 
-Allowance
+#Allowance
+---------
 {   
 	  "allowanceType" : "Transport",
 	  "isTaxable" : true,
@@ -11,7 +12,8 @@ Allowance
 	 
 }
 
-TaxRate
+#TaxRate
+--------
 {
 	 "fromSalary" : 601,
 	 "uptoSalary" : 1550,
@@ -19,7 +21,8 @@ TaxRate
 	 "deduction" : "60" 
 }
 
-Payroll
+#Payroll
+-------
 {
 "payroll":{
          	"grossSalary" : 2000
@@ -30,7 +33,8 @@ Payroll
  "allowanceIds" : [ 1 , 2 ,3 ,5 ] // list of allowance Ids
 }
 
-Deduction
+#Deduction
+---------
 {
 	 "deductionType" : "Cost Sharing",
 	 "deductionDescription" : "Student Cost Sharing " ,
