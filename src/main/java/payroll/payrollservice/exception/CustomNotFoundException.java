@@ -1,6 +1,4 @@
-package payroll.payrollservice.CustomException;
-
-import org.springframework.web.servlet.function.EntityResponse;
+package payroll.payrollservice.exception;
 
 public class CustomNotFoundException extends Exception {
 

@@ -1,4 +1,4 @@
-package payroll.payrollservice.CustomException;
+package payroll.payrollservice.exception;
 
 public class CustomInternalServerErrorException extends  Exception {
        public CustomInternalServerErrorException(String message){

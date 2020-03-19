@@ -1,4 +1,4 @@
-package payroll.payrollservice.CustomException;
+package payroll.payrollservice.exception;
 
 public class CustomNullException extends  Exception {
         public CustomNullException( String message){

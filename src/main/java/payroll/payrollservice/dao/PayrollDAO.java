@@ -1,7 +1,7 @@
-package payroll.payrollservice.DataAccessObjects;
+package payroll.payrollservice.dao;
 
 
-import payroll.payrollservice.Model.Payroll;
+import payroll.payrollservice.model.Payroll;
 
 import java.util.List;
 
