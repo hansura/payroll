@@ -22,7 +22,7 @@ public class TaxRate {
     private Double uptoSalary;
 
 
-    private String taxRatePercent;
+    private Double taxRatePercent;
 
     private Double deduction;
 

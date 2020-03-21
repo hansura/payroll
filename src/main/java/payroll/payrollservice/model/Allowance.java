@@ -23,7 +23,7 @@ public class Allowance {
     @JsonProperty
     private boolean isTaxable;
 
-    private String percent;
+    private Double percent;
 
     private Double amount;
 

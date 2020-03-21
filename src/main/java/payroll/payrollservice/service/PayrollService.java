@@ -21,10 +21,12 @@ public class PayrollService implements Common<Payroll,Payroll> {
     private TaxRateRepository taxRateRepository;
     private EmployeeRepository employeeRepository;
     private AllowanceRepository allowanceRepository;
+
     Double totalAllowance= 0.0;
     Double allowanceIncludeInGrossSalary = 0.0;
     Double allowanceNonTaxable = 0.0;
     Double allowanceAddedToNetSalary = 0.0;
+    Double  percentToNumber = 0.0;
     Double allowanceTaxPercent = 0.0;
     Double totalSalary = 0.0;
     Double taxRatePercent = 0.0;
@@ -121,7 +123,7 @@ public class PayrollService implements Common<Payroll,Payroll> {
 
         calculateAllowance(allowances);
 
-        taxRatePercent = convertPercentToNumber(taxRate.getTaxRatePercent());
+        taxRatePercent = (taxRate.getTaxRatePercent());
 
         incomeTax = calculateIncomeTax(grossSalary, taxRatePercent, taxRate.getDeduction());
 
@@ -161,12 +163,12 @@ public class PayrollService implements Common<Payroll,Payroll> {
         return ((grossSalary * taxRatePercent) - deduction);
     }
 
-    public  Double convertPercentToNumber( String percent){
-        allowanceTaxPercent =(Double.parseDouble(
-                percent.substring(0, percent.length() -1))/100);
-
-        return allowanceTaxPercent;
-    }
+//    public  Double convertPercentToNumber( Double percent)
+//    {
+//        percentToNumber =( percent/100);
+//
+//        return percentToNumber;
+//    }
 
     public  List<Double> calculateDeduction(List<Deduction> deductions , Double grossSalary ){
 
@@ -176,24 +178,16 @@ public class PayrollService implements Common<Payroll,Payroll> {
 
         for( Deduction deduct : deductions){
 
-            deductAmounts.add(grossSalary * convertPercentToNumber(deduct.getDeductionPercent()));
-            System.out.println("deduct percents \t" +  convertPercentToNumber(deduct.getDeductionPercent()));
-            System.out.println("deduct amounts \t" + (grossSalary * convertPercentToNumber(deduct.getDeductionPercent()) ));
+            deductAmounts.add(grossSalary * (deduct.getDeductionPercent()));
+            System.out.println("deduct percents \t" +  (deduct.getDeductionPercent()));
+            System.out.println("deduct amounts \t" + (grossSalary * (deduct.getDeductionPercent()) ));
         }
 
         return deductAmounts;
     }
 
 
-    public List<Deduction> getDeduction( List<Long> deductionIds){
 
-        List<Deduction>  deductions = new ArrayList<>();
-        deductionIds.forEach(
-                (id) -> deductions.add(deductionRepository.findById(id).get())
-        );
-
-        return deductions;
-    }
 
     public  Double calculateNetIncome(Double grossSalary , Double incomeTax , List<Double> deductAmounts){
 
@@ -214,7 +208,7 @@ public class PayrollService implements Common<Payroll,Payroll> {
             //for partial taxable
             if( allowances.get(i).isPartialTaxable() == true)
             {
-                allowanceTaxPercent =  convertPercentToNumber(allowances.get(i).getPercent());
+                allowanceTaxPercent =  (allowances.get(i).getPercent());
                 allowanceIncludeInGrossSalary = (allowances.get(i).getAmount() * allowanceTaxPercent );
                 grossSalary = grossSalary + allowanceIncludeInGrossSalary;
                 allowanceAddedToNetSalary = allowances.get(i).getAmount() - allowanceIncludeInGrossSalary;
@@ -294,7 +288,7 @@ public class PayrollService implements Common<Payroll,Payroll> {
 
         taxRate = getTaxRateDetail(grossSalary, taxRateRepository.findAll() );
 
-        taxRatePercent = convertPercentToNumber(taxRate.getTaxRatePercent());
+        taxRatePercent = (taxRate.getTaxRatePercent());
 
         incomeTax = calculateIncomeTax(grossSalary, taxRatePercent, taxRate.getDeduction());
 

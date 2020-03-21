@@ -18,7 +18,7 @@ public class Deduction {
     private Long id;
     private String deductionType;
     private String deductionDescription;
-    private String deductionPercent;
+    private Double deductionPercent;
 
     @ManyToMany(mappedBy = "deduction", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnore
