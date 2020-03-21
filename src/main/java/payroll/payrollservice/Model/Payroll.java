@@ -3,6 +3,7 @@ package payroll.payrollservice.model;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,15 +16,15 @@ public class Payroll {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Double incomeTax;
+    private BigDecimal incomeTax;
 
-    private Double grossSalary;
+    private BigDecimal grossSalary;
 
-    private Double netSalary;
+    private BigDecimal netSalary;
 
-    private Double totalAllowance;
+    private BigDecimal totalAllowance;
 
-    private Double totalAmount;
+    private BigDecimal totalAmount;
 
 
     @ManyToMany

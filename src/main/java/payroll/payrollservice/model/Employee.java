@@ -1,7 +1,9 @@
 package payroll.payrollservice.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -9,6 +11,8 @@ import java.util.List;
 
 @Entity(name = "employees")
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public  class Employee   {
 
     @Id
@@ -23,16 +27,6 @@ public  class Employee   {
     @OneToMany( mappedBy = "employee" , cascade = CascadeType.ALL , fetch =  FetchType.LAZY)
     @JsonIgnore
     private List<Payroll> payroll = new ArrayList<>();
-
-
-    public Employee() {
-    }
-
-    public Employee(String firstName, String lastName, List<Payroll> payroll) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.payroll = payroll;
-    }
 
 
 }

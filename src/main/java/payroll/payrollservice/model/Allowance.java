@@ -10,6 +10,7 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,7 +35,7 @@ public class Allowance {
     @Max(value = 100, message = "Percent value should be less than or equals to 100")
     private Double percent;
 
-    private Double amount;
+    private BigDecimal amount;
 
     @JsonProperty
     private boolean isPartialTaxable;
