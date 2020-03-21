@@ -6,7 +6,7 @@ Payroll Service
 {   
 	  "allowanceType" : "Transport",
 	  "isTaxable" : true,
-	  "percent" : "25%" ,
+	  "percent" : 25 ,
 	  "amount" : 900 ,
 	  "isPartialTaxable" : true
 	 
@@ -17,7 +17,7 @@ Payroll Service
 {
 	 "fromSalary" : 601,
 	 "uptoSalary" : 1550,
-	 "taxRatePercent" : "10%" ,
+	 "taxRatePercent" : 10 ,
 	 "deduction" : "60" 
 }
 
@@ -38,7 +38,7 @@ Payroll Service
 {
 	 "deductionType" : "Cost Sharing",
 	 "deductionDescription" : "Student Cost Sharing " ,
-	 "deductionPercent" : "2%" 
+	 "deductionPercent" : 2 
 }
 
 
