@@ -1,13 +1,17 @@
 package payroll.payrollservice.service;
 
+import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import payroll.payrollservice.model.Deduction;
 import payroll.payrollservice.repository.DeductionRepository;
 import payroll.payrollservice.util.Common;
 
+import javax.persistence.EntityNotFoundException;
 import java.util.List;
+
+import static payroll.payrollservice.util.Util.getNullPropertyNames;
 
 @Service
 public class DeductionService implements Common<Deduction,Deduction> {
@@ -30,17 +34,17 @@ public class DeductionService implements Common<Deduction,Deduction> {
 
     @Override
     public Deduction show(long id) {
-        return  deductionRepository.findById(id).get();
+        return  deductionRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Deduction with id " + id + " not found"));
     }
 
     @Override
     public Deduction update(long id, Deduction deduction) {
 
-        Deduction oldDeduction = deductionRepository.findById(id).get();
-
-        oldDeduction.setDeductionType(deduction.getDeductionType());
-        oldDeduction.setDeductionDescription(deduction.getDeductionDescription());
-        oldDeduction.setDeductionPercent(deduction.getDeductionPercent());
+        Deduction oldDeduction = show(id);
+        BeanUtils.copyProperties(deduction, oldDeduction, getNullPropertyNames(deduction));
+//        oldDeduction.setDeductionType(deduction.getDeductionType());
+//        oldDeduction.setDeductionDescription(deduction.getDeductionDescription());
+//        oldDeduction.setDeductionPercent(deduction.getDeductionPercent());
 
 
         return  deductionRepository.save(oldDeduction);
@@ -49,7 +53,7 @@ public class DeductionService implements Common<Deduction,Deduction> {
     @Override
     public boolean delete(long id) {
 
-        Deduction deduction = deductionRepository.findById(id).get();
+        Deduction deduction =show(id);
 
         if(deduction != null){
             deductionRepository.delete(deduction);
@@ -59,7 +63,7 @@ public class DeductionService implements Common<Deduction,Deduction> {
     }
 
     @Override
-    public Iterable<Deduction> getAll(Pageable pageable, Sort sort) {
-        return  deductionRepository.findAll();
+    public Page<Deduction> getAll(Pageable pageable) {
+        return  deductionRepository.findAll(pageable);
     }
 }

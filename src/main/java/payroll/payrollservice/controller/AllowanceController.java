@@ -3,34 +3,31 @@ package payroll.payrollservice.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 import payroll.payrollservice.model.Allowance;
 import payroll.payrollservice.service.AllowanceService;
 import payroll.payrollservice.util.Common;
+
 import java.util.List;
 
 @RestController
-@RequestMapping( value ="api/allowance")
-public class AllowanceController implements Common<Allowance,Allowance> {
+@RequestMapping(value = "api/allowance")
+public class AllowanceController implements Common<Allowance, Allowance> {
 
 
-     @Autowired
-     private AllowanceService allowanceService;
+    private AllowanceService allowanceService;
 
 
+    public AllowanceController(AllowanceService allowanceService) {
 
-     public AllowanceController(AllowanceService allowanceService ){
-
-       this.allowanceService = allowanceService ;
-     }
+        this.allowanceService = allowanceService;
+    }
 
 
     @Override
-    public Allowance store( @RequestBody Allowance allowance) {
-        System.out.println("allowance \t" + allowance.getAllowanceType());
+    public Allowance store(@RequestBody Allowance allowance) {
 
-        return   allowanceService.store(allowance);
+        return allowanceService.store(allowance);
 
     }
 
@@ -40,13 +37,13 @@ public class AllowanceController implements Common<Allowance,Allowance> {
     }
 
     @Override
-    public Allowance show( long id) {
+    public Allowance show(long id) {
         return allowanceService.show(id);
     }
 
     @Override
-    public Allowance update(long id, @RequestBody  Allowance allowance) {
-        return  allowanceService.update(id, allowance);
+    public Allowance update(long id, @RequestBody Allowance allowance) {
+        return allowanceService.update(id, allowance);
     }
 
     @Override
@@ -55,8 +52,8 @@ public class AllowanceController implements Common<Allowance,Allowance> {
     }
 
     @Override
-    public Iterable<Allowance> getAll(Pageable pageable, Sort sort) {
-        return allowanceService.getAll(pageable ,sort);
+    public Iterable<Allowance> getAll(Pageable pageable) {
+        return allowanceService.getAll(pageable);
     }
 }
 

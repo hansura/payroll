@@ -1,7 +1,6 @@
 package payroll.payrollservice.service;
 
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import payroll.payrollservice.model.TaxRate;
 import payroll.payrollservice.repository.TaxRateRepository;
@@ -57,7 +56,7 @@ public class TaxRateService implements Common<TaxRate,TaxRate> {
     }
 
     @Override
-    public Iterable<TaxRate> getAll(Pageable pageable, Sort sort) {
+    public Iterable<TaxRate> getAll(Pageable pageable) {
         return taxRateRepository.findAll();
     }
 }

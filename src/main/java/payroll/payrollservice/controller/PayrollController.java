@@ -1,9 +1,7 @@
 package payroll.payrollservice.controller;
 
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 import payroll.payrollservice.model.Payroll;
 import payroll.payrollservice.repository.*;
@@ -14,31 +12,21 @@ import payroll.payrollservice.util.Common;
 import java.util.*;
 
 @RestController
-@RequestMapping( value = "api/payroll")
+@RequestMapping(value = "api/payroll")
 
-public class PayrollController implements Common<PayrollDAO , Payroll> {
+public class PayrollController implements Common<PayrollDAO, Payroll> {
 
-    @Autowired
+
     private PayrollService payrollService;
 
-    @Autowired
-    DeductionRepository deductionRepository;
 
-    @Autowired
-    AllowanceRepository allowanceRepository;
-
-    @Autowired
-    EmployeeRepository employeeRepository;
-
-
-    public PayrollController(){
+    public PayrollController(PayrollService payrollService) {
+        this.payrollService = payrollService;
     }
 
 
     @Override
     public Payroll store(@RequestBody PayrollDAO payrollDAO) {
-              System.out.println("allowance \t" + payrollDAO.getAllowanceIds());
-        System.out.println("Deductions \t" + payrollDAO.getDeductionIds());
 
         return payrollService.storePayroll(payrollDAO);
     }
@@ -54,7 +42,7 @@ public class PayrollController implements Common<PayrollDAO , Payroll> {
     }
 
     @Override
-    public Payroll update(long id, @RequestBody  PayrollDAO payrollDAO) {
+    public Payroll update(long id, @RequestBody PayrollDAO payrollDAO) {
 
 
         return payrollService.updatePayroll(id, payrollDAO);
@@ -66,7 +54,7 @@ public class PayrollController implements Common<PayrollDAO , Payroll> {
     }
 
     @Override
-    public Iterable<Payroll> getAll(Pageable pageable, Sort sort) {
-        return payrollService.getAll(pageable , sort);
+    public Iterable<Payroll> getAll(Pageable pageable) {
+        return payrollService.getAll(pageable);
     }
 }

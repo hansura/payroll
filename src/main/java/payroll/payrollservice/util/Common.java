@@ -6,11 +6,8 @@
 package payroll.payrollservice.util;
 
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
-import payroll.payrollservice.exception.CustomNotFoundException;
 
-import javax.transaction.Transactional;
 import java.util.List;
 
 /**
@@ -43,7 +40,7 @@ public interface Common<T,Z> {
 //    Iterable<Z> getAll();
 
     @GetMapping(value = "/all",produces = { "application/json"})
-    Iterable<Z> getAll(Pageable pageable, Sort sort);
+    Iterable<Z> getAll(Pageable pageable);
 
 
 }

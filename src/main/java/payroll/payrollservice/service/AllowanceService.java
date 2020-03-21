@@ -1,28 +1,30 @@
 package payroll.payrollservice.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import payroll.payrollservice.model.Allowance;
-import payroll.payrollservice.model.Payroll;
 import payroll.payrollservice.repository.AllowanceRepository;
 import payroll.payrollservice.util.Common;
 
+import javax.persistence.EntityNotFoundException;
 import java.util.List;
 
+import static payroll.payrollservice.util.Util.getNullPropertyNames;
+
 @Service
-public class AllowanceService implements Common<Allowance,Allowance> {
+public class AllowanceService implements Common<Allowance, Allowance> {
 
     private AllowanceRepository allowanceRepository;
 
-public  AllowanceService( AllowanceRepository allowanceRepository){
-     this.allowanceRepository = allowanceRepository;
-}
+    public AllowanceService(AllowanceRepository allowanceRepository) {
+        this.allowanceRepository = allowanceRepository;
+    }
 
     @Override
     public Allowance store(Allowance allowance) {
-        return  allowanceRepository.save(allowance);
+        return allowanceRepository.save(allowance);
     }
 
     @Override
@@ -32,19 +34,19 @@ public  AllowanceService( AllowanceRepository allowanceRepository){
 
     @Override
     public Allowance show(long id) {
-        return  allowanceRepository.findById(id).get();
+        return allowanceRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Allowance with id " + id + " not found"));
     }
 
     @Override
     public Allowance update(long id, Allowance allowance) {
 
-         Allowance oldAllowance = allowanceRepository.findById(id).get();
-
-         oldAllowance.setAllowanceType(allowance.getAllowanceType());
-         oldAllowance.setAmount(allowance.getAmount());
-         oldAllowance.setPartialTaxable(allowance.isPartialTaxable());
-         oldAllowance.setPercent(allowance.getPercent());
-         oldAllowance.setTaxable(allowance.isTaxable());
+        Allowance oldAllowance = show(id);
+        BeanUtils.copyProperties(allowance, oldAllowance, getNullPropertyNames(allowance));
+//         oldAllowance.setAllowanceTitle(allowance.getAllowanceTitle());
+//         oldAllowance.setAmount(allowance.getAmount());
+//         oldAllowance.setPartialTaxable(allowance.isPartialTaxable());
+//         oldAllowance.setPercent(allowance.getPercent());
+//         oldAllowance.setTaxable(allowance.isTaxable());
 
         return allowanceRepository.save(oldAllowance);
     }
@@ -52,8 +54,8 @@ public  AllowanceService( AllowanceRepository allowanceRepository){
     @Override
     public boolean delete(long id) {
 
-        Allowance allowance = allowanceRepository.findById(id).get();
-        if(allowance != null){
+        Allowance allowance = show(id);
+        if (allowance != null) {
 
             allowanceRepository.delete(allowance);
             return true;
@@ -62,7 +64,7 @@ public  AllowanceService( AllowanceRepository allowanceRepository){
     }
 
     @Override
-    public Iterable<Allowance> getAll(Pageable pageable, Sort sort) {
-        return  allowanceRepository.findAll();
+    public Page<Allowance> getAll(Pageable pageable) {
+        return allowanceRepository.findAll(pageable);
     }
 }

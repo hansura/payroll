@@ -7,14 +7,14 @@ import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@Entity
-@Table(name = "employee")
+@Entity(name = "employees")
 @Data
 public  class Employee   {
 
     @Id
     @GeneratedValue( strategy = GenerationType.IDENTITY)
     private  Long id;
+    private String employeeId;
 
     private String firstName;
 
